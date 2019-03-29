@@ -8,6 +8,7 @@ import re
 import cPickle as pickle
 import gen_methods as gm
 import infer_pairwise_events
+import assign_events_to_genes
 
 
 ##TODO: Haircuts.  Lack of them is probably causing events to get purged due to slightly misplaced outer nodes
@@ -369,9 +370,7 @@ def get_cross_species_events(from_species, to_species, species_dict, num_threads
     return minimap2_standard_event_dict
 
 
-def event_haircut(event_dict_entry):
 
-    pass
 
 
 def check_event_type(event_dict_entry, event):
@@ -509,6 +508,21 @@ def check_event_type(event_dict_entry, event):
         return False
 
 
+def get_junction_key(event_dict_entry):
+
+    flat_joined_included_jl = "_".join([str(i) for j in event_dict_entry["included_junctions"] for i in j])
+    flat_joined_excluded_jl = "_".join([str(i) for j in event_dict_entry["excluded_junctions"] for i in j])
+
+    flat_joined_included_eij = "_".join(map(str, event_dict_entry["included_ei_junctions"]))
+    flat_joined_excluded_eij = "_".join(map(str, event_dict_entry["excluded_ei_junctions"]))
+
+    chrom = event_dict_entry["chrom"]
+    strand = event_dict_entry["strand"]
+
+    key = chrom + "_" + flat_joined_included_jl + "|" + flat_joined_included_eij + ":" +  flat_joined_excluded_jl + "|" + flat_joined_excluded_eij + "_" + strand
+
+
+
 def merged_event_dicts_by_species(event_dicts, cross_species_event_dicts, species_in_order, outdir):
 
     possible_duplicate_log = open(outdir + "/possible_duplicate_log.txt", 'w')
@@ -522,11 +536,7 @@ def merged_event_dicts_by_species(event_dicts, cross_species_event_dicts, specie
 
         for event in event_dicts[species]:
 
-            if event_dicts[species][event]["event_type"] != "RI" and event_dicts[species][event]["event_type"] != "MR":
-
-                junction_key = event_dicts[species][event]["chrom"] + "_" + "_".join(["_".join(map(str, i)) for i in event_dicts[species][event]["included_junctions"]]) + "_" + "_".join(["_".join(map(str, i)) for i in event_dicts[species][event]["excluded_junctions"]]) + "_" + event_dicts[species][event]["strand"]
-            else:
-                junction_key = event_dicts[species][event]["chrom"] + "_" + "_".join(["_".join(map(str, i)) for i in event_dicts[species][event]["excluded_junctions"]]) + "_" + event_dicts[species][event]["strand"]
+            junction_key = get_junction_key(event_dicts[species][event])
 
             merged_events[species][junction_key] = copy.deepcopy(event_dicts[species][event])
 
@@ -536,25 +546,16 @@ def merged_event_dicts_by_species(event_dicts, cross_species_event_dicts, specie
             merged_events[species][junction_key]["cross_species_keys"][species] = {event: junction_key}
 
 
-
         for other_species in cross_species_event_dicts[species]:
 
             for event in cross_species_event_dicts[species][other_species]:
 
-                if cross_species_event_dicts[species][other_species][event]["event_type"] != "RI" and event_dicts[other_species][event]["event_type"] != "MR":
+                junction_key = get_junction_key(cross_species_event_dicts[species][other_species][event])
 
-                    junction_key = cross_species_event_dicts[species][other_species][event]["chrom"] + "_" + "_".join("_".join(map(str, i)) for i in cross_species_event_dicts[species][other_species][event]["included_junctions"]) + "_" + "_".join("_".join(map(str, i)) for i in cross_species_event_dicts[species][other_species][event]["excluded_junctions"]) + "_" + cross_species_event_dicts[species][other_species][event]["strand"]
-
-                else:
-                    junction_key = cross_species_event_dicts[species][other_species][event]["chrom"] + "_" + "_".join("_".join(map(str, i)) for i in cross_species_event_dicts[species][other_species][event]["excluded_junctions"]) + "_" + cross_species_event_dicts[species][other_species][event]["strand"]
 
                 if event in event_dicts[other_species]:
 
-                    if event_dicts[other_species][event]["event_type"] != "RI" and event_dicts[other_species][event]["event_type"] != "MR":
-
-                        other_junction_key = event_dicts[other_species][event]["chrom"] + "_" + "_".join(["_".join(map(str, i)) for i in event_dicts[other_species][event]["included_junctions"]]) + "_" + "_".join(["_".join(map(str, i)) for i in event_dicts[other_species][event]["excluded_junctions"]]) + "_" + event_dicts[other_species][event]["strand"]
-                    else:
-                        other_junction_key = event_dicts[other_species][event]["chrom"] + "_" + "_".join(["_".join(map(str, i)) for i in event_dicts[other_species][event]["excluded_junctions"]]) + "_" + event_dicts[other_species][event]["strand"]
+                    other_junction_key = get_junction_key(event_dicts[other_species][event])
 
                 else:
 
@@ -696,7 +697,7 @@ def merged_event_dicts_by_species(event_dicts, cross_species_event_dicts, specie
     return renamed_merged_events
 
 
-def complete_merged_dict(merged_event_dict, species_dict):
+def complete_merged_dict(merged_event_dict, species_dict, add_gene_symbols, transcript_gtfs):
 
     ##add junctions, junction counts slots, remove duplicates or otherwise problematic events, clean up outermost exon edges
 
@@ -705,13 +706,22 @@ def complete_merged_dict(merged_event_dict, species_dict):
 
         splice_lib.complete_event_dict(merged_event_dict[species])
 
-        #matches_dict, genes_dict, transcript_dict = assign_events_to_genes.main(["--transcript_gtf", species_dict[species]["merged_stringtie_gtf_path"], "--gene_gtf", species_dict[species]["annotated_transcript_gtf"], "--prefix", "placeholder", "--outdir", "topdir", "--suppress_output"], merged_event_dict[species])
+        if add_gene_symbols:
 
-        #for gene in matches_dict:
+            if transcript_gtfs
 
-        #    for event in matches_dict[gene]:
+                matches_dict, genes_dict, transcript_dict = assign_events_to_genes.main(["--transcript_gtf", species_dict[species]["merged_stringtie_gtf_path"], "--gene_gtf", species_dict[species]["annotated_transcript_gtf"], "--prefix", "placeholder", "--outdir", "topdir", "--suppress_output"], merged_event_dict[species])
 
-        #        merged_event_dict[species][event].setdefault("gene", []).append(gene)
+            else:
+
+                matches_dict, genes_dict, transcript_dict = assign_events_to_genes.main(["--gene_gtf", species_dict[species]["annotated_transcript_gtf"], "--prefix", "placeholder", "--outdir", "topdir", "--suppress_output"], merged_event_dict[species])
+
+            for gene in matches_dict:
+
+                for event in matches_dict[gene]:
+
+                    merged_event_dict[species][event].setdefault("gene", []).append(gene)
+
 
 
 
@@ -925,9 +935,23 @@ def main():
     parser.add_argument("--num_threads", type = str, help = "Number of threads for minimap2 to use - default = 1", default = "1")
     parser.add_argument("--genePredToGtf_path", type = str, help = "Path to genePredToGtf executable - default = 'genePredToGtf'", default = "genePredToGtf")
     parser.add_argument("--liftOver_path", type = str, help = "Path to liftOver executable - default = 'liftOver'", default = "liftOver")
-
+    parser.add_argument("--add_gene_symbols", action = "store_true", help = "If set, the genes to which the events belong will be included.  Requires --gene_gtfs and can make use of --transcript_gtfs")
+    parser.add_argument("--gene_gtfs", type = str, help = "Comma-separated list of paths to annotation gtfs for each species, in the same order as --species_list.  Required (but only used for) --add_gene_symbols")
+    parser.add_argument("--transcript_gtfs", type = str, help = "Comma-separated list of paths to transcript gtfs for each species in the same order as --species_list.  Can be made use of by --add_gene_symbols to increase the number of events for which symbols can be identified")
 
     args = parser.parse_args()
+
+    if args.add_gene_symbols and not args.gene_gtfs:
+
+        sys.exit("Passage of --add_gene_symbols requires --gene_gtfs")
+
+    elif args.add_gene_symbols:
+
+        annotated_transcript_gtf_list = args.gene_gtfs.split(",")
+
+        if args.transcript_gtfs:
+
+            merged_stringtie_gtf_path_list = args.transcript_gtfs.split(",")
 
     ##require that either minimap_outdir OR liftover_outdir be set
 
@@ -992,6 +1016,11 @@ def main():
             species_dict[species]["liftover_outdir"] = species_outdir
             gm.run_bash_cmd(("mkdir -p " + species_outdir).split())
 
+        if args.add_gene_symbols:
+            species_dict[species]["annotated_transcript_gtf"] = annotated_transcript_gtf_list[i]
+            if args.transcript_gtfs:
+                species_dict[species]["merged_stringtie_gtf_path"] = merged_stringtie_gtf_path_list[i]
+
 
         species_dict[species]["prefix"] = prefixes[i]
 
@@ -1046,7 +1075,7 @@ def main():
 
         merged_event_dict = merged_event_dicts_by_species(event_dicts, cross_species_event_dicts, species_list, args.minimap_outdir)
 
-        complete_merged_dict(merged_event_dict, species_dict)
+        complete_merged_dict(merged_event_dict, species_dict, args.add_gene_symbols, args.transcript_gtfs)
 
         native_events = {}
 
@@ -1111,7 +1140,7 @@ def main():
 
         merged_event_dict = merged_event_dicts_by_species(event_dicts, cross_species_event_dicts, species_list, args.liftover_outdir)
 
-        complete_merged_dict(merged_event_dict, species_dict)
+        complete_merged_dict(merged_event_dict, species_dict, args.add_gene_symbols, args.transcript_gtfs)
 
         native_events = {}
 
