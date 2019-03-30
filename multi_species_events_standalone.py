@@ -1123,7 +1123,7 @@ def main():
 
                 if other_species != species:
 
-                    cross_species_event_dicts.setdefault(other_species, {species: splice_lib.generate_standard_event_dict(run_liftOver(chain_paths_dict[species][other_species], species_dict[species]["native_event_gtf_path"], args.liftover_outdir, species, other_species))}).update({species: splice_lib.generate_standard_event_dict(run_liftOver(chain_paths_dict[species][other_species], species_dict[species]["native_event_gtf_path"], args.liftover_outdir, species, other_species))})
+                    cross_species_event_dicts.setdefault(other_species, {species: splice_lib.generate_standard_event_dict(run_liftOver(chain_paths_dict[species][other_species], species_dict[species]["native_event_gtf_path"], args.liftover_outdir, species, other_species))})
 
                     ##check for non-zero exon lists
                     ##check for preservation of exon counts
