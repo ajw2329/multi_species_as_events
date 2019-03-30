@@ -708,7 +708,7 @@ def complete_merged_dict(merged_event_dict, species_dict, add_gene_symbols, tran
 
         if add_gene_symbols:
 
-            if transcript_gtfs
+            if transcript_gtfs:
 
                 matches_dict, genes_dict, transcript_dict = assign_events_to_genes.main(["--transcript_gtf", species_dict[species]["merged_stringtie_gtf_path"], "--gene_gtf", species_dict[species]["annotated_transcript_gtf"], "--prefix", "placeholder", "--outdir", "topdir", "--suppress_output"], merged_event_dict[species])
 
