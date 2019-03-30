@@ -630,7 +630,6 @@ def merged_event_dicts_by_species(event_dicts, cross_species_event_dicts, specie
 
         i -= 1
 
-    ####Name event by human ID whenever possible.  Species-specific events should be denoted as such in ID.  e.g. cSE.0000457 for chimpanzee-specific SE, or cmoSE.0000301 for SE event common to chimpanzee, macaque, orangutan
 
     #pickle.dump(merged_events, open(outdir + "/merged_events_pre_rename_standard_event_dict.pkl", 'wb'), pickle.HIGHEST_PROTOCOL)
 
@@ -1058,7 +1057,7 @@ def main():
 
                 if other_species != species:
 
-                    cross_species_event_dicts.setdefault(other_species, {species: get_cross_species_events(species, other_species, species_dict, args.num_threads, minimap2_path = args.minimap2_path, samtools_path = args.samtools_path, bedtools_path = args.bedtools_path, bedToGenePred_path = args.bedToGenePred_path, genePredToGtf_path = args.genePredToGtf_path)}).update({species: get_cross_species_events(species, other_species, species_dict, args.num_threads, minimap2_path = args.minimap2_path, samtools_path = args.samtools_path, bedtools_path = args.bedtools_path, bedToGenePred_path = args.bedToGenePred_path, genePredToGtf_path = args.genePredToGtf_path)})
+                    cross_species_event_dicts.setdefault(other_species, {species: get_cross_species_events(species, other_species, species_dict, args.num_threads, minimap2_path = args.minimap2_path, samtools_path = args.samtools_path, bedtools_path = args.bedtools_path, bedToGenePred_path = args.bedToGenePred_path, genePredToGtf_path = args.genePredToGtf_path)})
 
                     ##check for non-zero exon lists
                     ##check for preservation of exon counts
