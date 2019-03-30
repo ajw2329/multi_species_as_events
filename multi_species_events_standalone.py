@@ -921,7 +921,7 @@ def main():
 
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("--event_file_prefixes", type = str, help = "Comma-separated list of prefixes to event gtfs and fasta files.  e.g. human_splice_lib_events,chimpanzee_splice_lib_events which will allow the program to find human_splice_lib_events.gtf, human_splice_lib_events.fa, chimpanzee_splice_lib_events.gtf and chimpanzee_splice_lib_events.fa from input directory", required = True)
+    parser.add_argument("--event_file_prefixes", type = str, help = "Comma-separated list of prefixes to event gtfs, ioes, and fasta files.  e.g. human_splice_lib_events,chimpanzee_splice_lib_events which will allow the program to find human_splice_lib_events.gtf, human_splice_lib_events.fa, chimpanzee_splice_lib_events.gtf and chimpanzee_splice_lib_events.fa from input directory", required = True)
     parser.add_argument("--species_list", type = str, help = "Comma-separated list of species names.  Expected to be in same order as corresponding prefixes supplied in --event_file_prefixes argument", required = True)
     parser.add_argument("--indir", type = str, help = "Path to input directory in which event gtf and fasta files can be found (.fa extension expected for fasta files) with prefixes matching those supplied to the --event_file_prefixes argument", required = True)
     parser.add_argument("--genome_fasta_paths", type = str, help = "Comma-separated paths to genome fasta files.  In same order as '--species_list' argument")
@@ -1099,7 +1099,7 @@ def main():
 
                 file.write("\t".join([event, ",".join(sorted(native_events[event]))]) + "\n")
 
-        check_gene_equivalence(merged_event_dict, topdir, species_list)
+        check_gene_equivalence(merged_event_dict, args.minimap_outdir, species_list)
 
         for species in merged_event_dict:
 
@@ -1163,7 +1163,7 @@ def main():
 
                 file.write("\t".join([event, ",".join(sorted(native_events[event]))]) + "\n")
 
-        check_gene_equivalence(merged_event_dict, topdir, species_list)
+        check_gene_equivalence(merged_event_dict, args.liftover_outdir, species_list)
 
         for species in merged_event_dict:
 
