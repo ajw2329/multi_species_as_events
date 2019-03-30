@@ -1099,7 +1099,7 @@ def main():
 
                 file.write("\t".join([event, ",".join(sorted(native_events[event]))]) + "\n")
 
-        #check_gene_equivalence(merged_event_dict, topdir, species_list)
+        check_gene_equivalence(merged_event_dict, topdir, species_list)
 
         for species in merged_event_dict:
 
@@ -1163,7 +1163,7 @@ def main():
 
                 file.write("\t".join([event, ",".join(sorted(native_events[event]))]) + "\n")
 
-        #check_gene_equivalence(merged_event_dict, topdir, species_list)
+        check_gene_equivalence(merged_event_dict, topdir, species_list)
 
         for species in merged_event_dict:
 
