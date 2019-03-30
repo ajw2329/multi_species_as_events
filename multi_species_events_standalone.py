@@ -468,7 +468,7 @@ def check_event_type(event_dict_entry, event):
 
         else:
 
-            print event, "Pre-comprehensive misclassification tag"
+            #print event, "Pre-comprehensive misclassification tag"
             event_misclassified = True ### replace this with something more helpful
 
 
@@ -484,20 +484,20 @@ def check_event_type(event_dict_entry, event):
         else:
 
             event_misclassified = True ### replace this with something more helpful
-            print event, "Pre-comprehensive misclassification tag"
+            #print event, "Pre-comprehensive misclassification tag"
 
     else:
 
         if not (event_dict_entry["included_exons"][0][0] == event_dict_entry["excluded_exons"][0][0] and event_dict_entry["included_exons"][-1][-1] == event_dict_entry["excluded_exons"][-1][-1]):
 
             event_misclassified = True ### replace this with something more helpful
-            print event, "Pre-comprehensive misclassification tag"
+            #print event, "Pre-comprehensive misclassification tag"
 
     if not event_misclassified:
 
         class_result = infer_pairwise_events.classify_event(pre_common, post_common, tx1_unique, tx2_unique, form_1_exons, form_2_exons, strand, tx1, tx2)
 
-        print event, class_result
+        #print event, class_result
 
         same_classification = initial_event_type == class_result["event_type"]
 
@@ -848,8 +848,8 @@ def check_mapped_event_integrity(mapped_species, source_species, mapped_events_d
 
         if not (len(mapped_events_dict[event]["included_exons"]) == 0 or len(mapped_events_dict[event]["excluded_exons"]) == 0):
 
-            print mapped_events_dict[event]["included_exons"]
-            print mapped_events_dict[event]["excluded_exons"]
+            #print mapped_events_dict[event]["included_exons"]
+            #print mapped_events_dict[event]["excluded_exons"]
 
             same_classification = check_event_type(mapped_events_dict[event], event)
 
