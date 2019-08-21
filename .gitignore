@@ -1,0 +1,5 @@
+*.gtf
+*.tsv
+*.pyc
+run_all.sh
+all_vars.sh
